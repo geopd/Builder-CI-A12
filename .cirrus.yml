@@ -1,0 +1,30 @@
+task:
+
+  name: Builds
+  timeout_in: 120m
+  container:
+    dockerfile: Dockerfile
+    cpu: 8
+    memory: 32G
+
+  env:
+    CIRRUS_WORKING_DIR: "/tmp/ci"
+    DRIVE:
+    TOKEN:
+    CHATID:
+    BOTTOKEN:
+    GIT_COOKIES:
+    TDRIVE:
+    NAME:
+    T_DEVICE:
+
+  download_cc_background_script:
+    - bash download_ccache.sh
+  upload_cc_background_script:
+    - bash upload_ccache.sh
+  retry_cc_background_script:
+    - bash retry_ccache.sh
+  build_script:
+    - bash build.sh
+  final_upload_cc_script:
+    - bash final_upload_ccache.sh
