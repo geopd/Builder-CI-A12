@@ -32,7 +32,9 @@ rom() {
 		;;
 		"Crdroid-12") MANIFEST=https://github.com/crdroidandroid/android.git BRANCH=12.0
 		;;
-		*) echo "Invalid option!"
+		"Evox-12") MANIFEST=https://github.com/Evolution-X/manifest.git BRANCH=snow
+		;;
+		*) echo "Setup Rom manifest and branch name in case function"
  		exit 1
  		;;
 	esac
@@ -45,7 +47,9 @@ build_command() {
 		;;
 		"Crdroid-12") lunch lineage_sakura-user && m bacon -j20
 		;;
-		*) echo "Invalid option!"
+		"Evox-12") lunch evolution_sakura-user && m evolution -j20
+		;;
+		*) echo "Build commands need to be added!"
 		exit 1
 		;;
 	esac
@@ -154,11 +158,14 @@ telegram_post_sync() {
 telegram_post_build() {
 	telegram_message "
 	*✅ Build finished after $(($BDIFF / 3600)) hour(s) and $(($BDIFF % 3600 / 60)) minute(s) and $(($BDIFF % 60)) seconds*
+
 	*ROM:* \`${ZIPNAME}\`
 	*MD5 Checksum:* \`${MD5CHECK}\`
 	*Download Link:* [Tdrive](${DWD})
 	*Size:* \`${ZIPSIZE}\`
+
 	*Commit SHA:* \`$(commit_sha)\`
+
 	*Date:*  \`$(date +"%d-%m-%Y %T")\`" &> /dev/null
 }
 

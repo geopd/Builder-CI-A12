@@ -16,21 +16,35 @@
 # limitations under the License.
 #
 
-# Check ccache hit rate for 99-100%.
-# Trigger retry if hit rate is below 99%.
-retry_event () {
-	sleep 110m
+# Sorting final zip
+compiled_zip() {
+	ZIP=$(find $(pwd)/out/target/product/${T_DEVICE}/ -maxdepth 1 -name "*${T_DEVICE}*.zip" | perl -e 'print sort { length($b) <=> length($a) } <>' | head -n 1)
+	ZIPNAME=$(basename ${ZIP})
+}
+
+# Retry the ccache fill for 99-100% hit rate
+retry_ccache () {
 	export CCACHE_DIR=/tmp/ccache
 	export CCACHE_EXEC=$(which ccache)
 	hit_rate=$(ccache -s | awk '/hit rate/ {print $4}' | cut -d'.' -f1)
 	if [ $hit_rate -lt 99 ]; then
 		git clone https://${TOKEN}@github.com/geopd/Builder-CI-A12 cirrus && cd $_
-		git commit --allow-empty -m "Retry: Ccache loop $(date -u +"%D %T%P %Z")"
+		git commit --allow-empty -m "Retry: Ccache loop $(date -u +"%D %T%p %Z")"
 		git push -q
 	else
 		echo "Ccache is fully configured"
 	fi
 }
 
-cd /tmp/rom
+# Trigger retry only if compilation is not finished
+retry_event() {
+	if [ -f $(pwd)/out/target/product/${T_DEVICE}/${ZIPNAME} ]; then
+		echo "Successful Build"
+	else
+		retry_ccache
+	fi
+}
+
+cd /tmp/rom && sleep 110m
+compiled_zip
 retry_event
