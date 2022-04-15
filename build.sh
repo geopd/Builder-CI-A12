@@ -30,7 +30,9 @@ rom() {
 	case "${NAME}" in
 		"AEX-12") MANIFEST=https://github.com/AospExtended/manifest.git BRANCH=12.x
 		;;
-		"Crdroid-12") MANIFEST=https://github.com/crdroidandroid/android.git BRANCH=12.0
+		"Crdroid-12") MANIFEST=https://github.com/crdroidandroid/android.git BRANCH=12.1
+		;;
+		"dot12.1") MANIFEST=https://github.com/DotOS/manifest.git BRANCH=dot12.1
 		;;
 		"Evox-12") MANIFEST=https://github.com/Evolution-X/manifest.git BRANCH=snow
 		;;
@@ -46,6 +48,8 @@ build_command() {
 		"AEX-12") lunch aosp_sakura-user && m aex -j20
 		;;
 		"Crdroid-12") lunch lineage_sakura-user && m bacon -j20
+		;;
+		"dot12.1") lunch dot_sakura-user && m bacon -j20
 		;;
 		"Evox-12") lunch evolution_sakura-user && m evolution -j20
 		;;
@@ -98,7 +102,7 @@ build_configuration() {
 	repo init --depth=1 --no-repo-verify -u $MANIFEST  -b $BRANCH -g default,-mips,-darwin,-notdefault
 	git clone $LOCAL_MANIFEST -b $NAME .repo/local_manifests
 	repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j13
-        source setup_script.sh
+	source setup_script.sh
 	source build/envsetup.sh
 }
 
@@ -125,10 +129,12 @@ ccache_configuration() {
 	export CCACHE_DIR=/tmp/ccache
 	export CCACHE_EXEC=$(which ccache)
 	export USE_CCACHE=1
-	export CCACHE_COMPRESS=true
-	export CCACHE_COMPRESSLEVEL=1
+	export CCACHE_DEPEND=true
+	export CCACHE_FILECLONE=true
 	export CCACHE_LIMIT_MULTIPLE=0.9
-	export CCACHE_MAXSIZE=50G
+	export CCACHE_MAXSIZE=0
+	export CCACHE_NOCOMPRESS=true
+	export CCACHE_NOHASHDIR=1
 	ccache -z
 }
 
