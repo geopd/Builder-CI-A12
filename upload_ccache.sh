@@ -23,5 +23,12 @@ ccache_upload () {
 	rclone copy --drive-chunk-size 256M --stats 1s $1.tar.zst brrbrr:$1/$NAME -P
 }
 
+ccache_stats () {
+	export CCACHE_DIR=/tmp/ccache
+	export CCACHE_EXEC=$(which ccache)
+	ccache -s
+}
+
 cd /tmp
 ccache_upload ccache
+ccache_stats

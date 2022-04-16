@@ -26,6 +26,7 @@ compiled_zip() {
 retry_ccache () {
 	export CCACHE_DIR=/tmp/ccache
 	export CCACHE_EXEC=$(which ccache)
+	ccache -s
 	hit_rate=$(ccache -s | awk 'NR==2 { print $5 }' | tr -d '(' | cut -d'.' -f1)
 	if [[ $hit_rate -lt 100 && ! -f out/build_error ]]; then
 		echo "Ccache is not fully configured"
@@ -48,6 +49,6 @@ retry_event() {
 	fi
 }
 
-cd /tmp/rom && sleep 110m
+cd /tmp/rom && sleep 115m
 compiled_zip
 retry_event
