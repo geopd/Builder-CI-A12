@@ -30,7 +30,7 @@ rom() {
 	case "${NAME}" in
 		"AOSPA-12") MANIFEST=https://github.com/AOSPA/manifest.git BRANCH=sapphire
 		;;
-		"AEX-12") MANIFEST=https://github.com/AospExtended/manifest.git BRANCH=12.x
+		"AEX-12") MANIFEST=https://github.com/AospExtended/manifest.git BRANCH=12.1.x
 		;;
 		"Crdroid-12") MANIFEST=https://github.com/crdroidandroid/android.git BRANCH=12.1
 		;;
