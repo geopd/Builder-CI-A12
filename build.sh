@@ -132,7 +132,7 @@ ccache_configuration() {
 	export CCACHE_DEPEND=true
 	export CCACHE_FILECLONE=true
 	export CCACHE_LIMIT_MULTIPLE=0.9
-	export CCACHE_MAXSIZE=0
+	export CCACHE_MAXSIZE=10G
 	export CCACHE_NOCOMPRESS=true
 	export CCACHE_NOHASHDIR=1
 	ccache -z
