@@ -212,7 +212,9 @@ telegram_post(){
 compile_moments() {
 	build_dir
 	git_setup
-	clone_file
+	if [ $GIT_USER = GeoPD ]; then
+		clone_file
+	fi
 	ssh_authenticate
 	time_sec SYNC_START
 	rom
