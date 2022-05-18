@@ -28,6 +28,8 @@ LOCAL_MANIFEST=https://${TOKEN}@github.com/geopd/local_manifests
 # ROM Manifest and Branch
 rom() {
 	case "${NAME}" in
+		"AOSPA-12") MANIFEST=https://github.com/AOSPA/manifest.git BRANCH=sapphire
+		;;
 		"AEX-12") MANIFEST=https://github.com/AospExtended/manifest.git BRANCH=12.x
 		;;
 		"Crdroid-12") MANIFEST=https://github.com/crdroidandroid/android.git BRANCH=12.1
@@ -45,6 +47,8 @@ rom() {
 # Build command for rom
 build_command() {
 	case "${NAME}" in
+		"AOSPA-12") lunch aospa_sakura-user && m otapackage -j20
+		;;
 		"AEX-12") lunch aosp_sakura-user && m aex -j20
 		;;
 		"Crdroid-12") lunch lineage_sakura-user && m bacon -j20
