@@ -74,6 +74,7 @@ tree_path() {
 # Build post-gen variables (optional)
 lazy_build_post_var() {
 	LAZY_BUILD_POST=true
+	INCLUDE_GAPPS=true
 	ANDROID_VERSION="Android 12L"
 	RELEASE_TYPE="Test"
 	DEV=GeoPD
@@ -118,6 +119,18 @@ build_configuration() {
 	git clone $LOCAL_MANIFEST -b $NAME .repo/local_manifests
 	repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j13
 	source setup_script.sh
+}
+
+# Setup Gapps package on release post generation
+build_gapps() {
+	if [ $INCLUDE_GAPPS = true ]; then
+		rm -rf ${post[0]}
+		export WITH_GAPPS=true
+		build_command
+		compiled_zip
+		build_upload
+	fi
+	telegram_post
 }
 
 # Build commands for rom
@@ -195,10 +208,10 @@ telegram_post_build() {
 	telegram_message "
 	*✅ Build finished after $(($BDIFF / 3600)) hour(s) and $(($BDIFF % 3600 / 60)) minute(s) and $(($BDIFF % 60)) seconds*
 
-	*ROM:* \`${ZIPNAME}\`
-	*MD5 Checksum:* \`${MD5CHECK}\`
-	*Download Link:* [Tdrive](${DWD})
-	*Size:* \`${ZIPSIZE}\`
+	*ROM:* \`${post[1]}\`
+	*MD5 Checksum:* \`${post[3]}\`
+	*Download Link:* [Tdrive](${DWD1})
+	*Size:* \`${post[2]}\`
 
 	*Commit SHA:* \`$(commit_sha)\`
 
@@ -212,12 +225,15 @@ telegram_post_error() {
 }
 
 # Sorting final zip ( commonized considering ota zips, .md5sum etc with similiar names  in diff roms)
+post=()
 compiled_zip() {
-	ZIP=$(find $(pwd)/out/target/product/${T_DEVICE}/ -maxdepth 1 -name "*${T_DEVICE}*.zip" | perl -e 'print sort { length($b) <=> length($a) } <>' | head -n 1)
+	OUT=$(pwd)/out/target/product/${T_DEVICE}
+	ZIP=$(find ${OUT}/ -maxdepth 1 -name "*${T_DEVICE}*.zip" | perl -e 'print sort { length($b) <=> length($a) } <>' | head -n 1)
 	ZIPNAME=$(basename ${ZIP})
 	ZIPSIZE=$(du -sh ${ZIP} |  awk '{print $1}')
 	MD5CHECK=$(md5sum ${ZIP} | cut -d' ' -f1)
 	echo "${ZIP}"
+	post+=("${ZIP}") && post+=("${ZIPNAME}") && post+=("${ZIPSIZE}") && post+=("${MD5CHECK}")
 }
 
 # Generate changelog of past 7 days
@@ -273,14 +289,16 @@ lazy_build_post() {
 
 	telegram_build_post ${POST_IMAGE} "
 	*#${T_NAME} #ROM #$(echo ${ANDROID_VERSION,,} | tr -d ' ') #${T_DEVICE,,} #${DEVICE2,,}
-	$(echo ${ZIPNAME^^}| cut -d'-' -f1) | ${ANDROID_VERSION^}
+	$(echo ${post[1]^^}| cut -d'-' -f1) | ${ANDROID_VERSION^}
 	Updated:* \`$(date +"%d-%B-%Y")\`
 	*By:* [${DEV}](${TG_LINK})
 
-	*▪️ Downloads:* [Vanilla](${DWD}) *(${ZIPSIZE})*
+	*▪️ Downloads:* [Vanilla](${DWD1}) *(${post[2]})* | [Gapps](${DWD2}) *(${post[6]})*
 	*▪️ Changelogs:* [Source Changelogs]($(echo $(telegraph_post) | tr -d '\\'))
-	*▪️ ROM:* \`${ZIPNAME}\`
-	*▪️ MD5 Checksum:* \`${MD5CHECK}\`
+	*▪️ VANILLA:* \`${post[1]}\`
+	*▪️ GAPPS:* \`${post[5]}\`
+	*▪️ MD5(Vanilla):* \`${post[3]}\`
+	*▪️ MD5(Gapps):* \`${post[7]}\`
 
 	*Notes:*
 	• ${ANDROID_VERSION} ${RELEASE_TYPE} Release.
@@ -294,11 +312,20 @@ lazy_build_post() {
 	*Date:*  \`$(date +"%d-%m-%Y %T")\`" &> /dev/null
 }
 
+# Upload rom zip to tdrive/gdrive
+build_upload() {
+	if [ -f ${OUT}/${post[1]} ]; then
+		rclone copy ${post[0]} brrbrr:rom -P
+		DWD1=${TDRIVE}${post[1]}
+	elif [ -f ${OUT}/${post[5]} ]; then
+		rclone copy ${post[4]} brrbrr:rom -P
+		DWD2=${TDRIVE}${post[5]}
+	fi
+}
+
 # Post Build finished with Time,duration,md5,size&Tdrive link OR post build_error&trimmed build.log in TG
-telegram_post(){
-	if [ -f $(pwd)/out/target/product/${T_DEVICE}/${ZIPNAME} ]; then
-		rclone copy ${ZIP} brrbrr:rom -P
-		DWD=${TDRIVE}${ZIPNAME}
+telegram_post() {
+	if [[ -f ${OUT}/${post[1]} || -f ${OUT}/${post[5]} ]]; then
 		if [[ $GIT_USER = GeoPD && $LAZY_BUILD_POST = true ]]; then
 			lazy_build_post
 		else
@@ -333,7 +360,11 @@ compile_moments() {
 	time_sec BUILD_END
 	time_diff BDIFF BUILD_START BUILD_END
 	compiled_zip
-	telegram_post
+	build_upload
+	if [ ! $LAZY_BUILD_POST = true ]; then
+		telegram_post
+	fi
+	build_gapps
 	ccache -s
 }
 
