@@ -44,18 +44,18 @@ rom() {
 	esac
 }
 
-# Build command for rom
-build_command() {
+# Build package and build type
+build_package() {
 	case "${NAME}" in
-		"AOSPA-12") lunch aospa_sakura-user && m otapackage -j20
+		"AOSPA-12") PACKAGE=otapackage BUILD_TYPE=user
 		;;
-		"AEX-12") lunch aosp_sakura-user && m aex -j20
+		"AEX-12") PACKAGE=aex BUILD_TYPE=user
 		;;
-		"Crdroid-12") lunch lineage_sakura-user && m bacon -j20
+		"Crdroid-12") PACKAGE=bacon BUILD_TYPE=user
 		;;
-		"dot12.1") lunch dot_sakura-user && m bacon -j20
+		"dot12.1") PACKAGE=bacon BUILD_TYPE=user
 		;;
-		"Evox-12") lunch evolution_sakura-user && m evolution -j20
+		"Evox-12") PACKAGE=evolution BUILD_TYPE=user
 		;;
 		*) echo "Build commands need to be added!"
 		exit 1
@@ -118,7 +118,15 @@ build_configuration() {
 	git clone $LOCAL_MANIFEST -b $NAME .repo/local_manifests
 	repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j13
 	source setup_script.sh
+}
+
+# Build commands for rom
+build_command() {
 	source build/envsetup.sh
+	ccache_configuration
+	tree_path
+	lunch $(basename -s .mk $(find $DEVICE_TREE -maxdepth 1 -name "*$T_DEVICE*.mk"))-${BUILD_TYPE}
+	m ${PACKAGE} -j 20
 }
 
 # Export time, time format for telegram messages
@@ -132,7 +140,6 @@ time_diff() {
 
 # Branch name & Head commit sha for ease of tracking
 commit_sha() {
-	tree_path
 	for repo in ${DEVICE_TREE} ${VENDOR_TREE} ${KERNEL_TREE}
 	do
 		printf "[$(echo $repo | cut -d'/' -f1 )/$(git -C ./$repo/.git rev-parse --short=10 HEAD)]"
@@ -317,11 +324,11 @@ compile_moments() {
 	time_sec SYNC_START
 	rom
 	build_configuration
-	ccache_configuration
 	time_sec SYNC_END
 	time_diff SDIFF SYNC_START SYNC_END
 	telegram_post_sync
 	time_sec BUILD_START
+	build_package
 	build_command
 	time_sec BUILD_END
 	time_diff BDIFF BUILD_START BUILD_END
