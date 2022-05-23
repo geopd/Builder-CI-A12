@@ -76,10 +76,10 @@ lazy_build_post_var() {
 	LAZY_BUILD_POST=true
 	INCLUDE_GAPPS=true
 	ANDROID_VERSION="Android 12L"
-	RELEASE_TYPE="Test"
+	RELEASE_TYPE="Stable"
 	DEV=GeoPD
 	TG_LINK=https://t.me/mysto_o
-	GRP_LIN="@mystohub"
+	GRP_LIN="mystohub"
 	DEVICE2=daisa #Since I do unified builds for daisy&sakura
 }
 
@@ -260,20 +260,34 @@ generate_changelog() {
 	done
 }
 
-# Generate telegraph post of changelog
+# Telegraph post
 telegraph_post() {
-	generate_changelog
-	sed -i "s/\"/'/g" ${CHANGELOG}
 	curl -X POST \
 		-H 'Content-Type: application/json' \
 		-d '{
 			"access_token": "'${TGP_TOKEN}'",
-			"title": "Source Changelogs",
+			"title": "'$3'",
 			"author_name":"geopd",
-			"content": [{"tag":"p","children":["'"$(cat ${CHANGELOG})"'"]}],
+			"content": [{"tag":"'$1'","children":["'"$(cat $2)"'"]}],
 			"return_content":"true"
 		}' \
 		https://api.telegra.ph/createPage | cut -d'"' -f12
+}
+
+# Generate telegraph post of changelog
+changelog_post() {
+	generate_changelog
+	sed -i "s/\"/'/g" ${CHANGELOG}
+	telegraph_post p ${CHANGELOG} Source-Changelogs
+}
+
+# Generate telegraph post including zipname and MD5
+zip_details() {
+    ZIPDETAILS=$(pwd)/zipdetails.txt
+    touch ${ZIPDETAILS}
+    printf "ROM Name: %s\n\n" "${post[1]} (VANILLA)" "${post[5]} (GAPPS)" >> ${ZIPDETAILS}
+    printf "MD5 Checksum: %s\n\n" "${post[3]} (VANILLA)" "${post[7]} (GAPPS)" >> ${ZIPDETAILS}
+    telegraph_post b ${ZIPDETAILS} ROM-Info
 }
 
 # Aah yes! Generate a build post that's similiar to normal official posts
@@ -294,11 +308,9 @@ lazy_build_post() {
 	*By:* [${DEV}](${TG_LINK})
 
 	*▪️ Downloads:* [Vanilla](${DWD1}) *(${post[2]})* | [Gapps](${DWD2}) *(${post[6]})*
-	*▪️ Changelogs:* [Source Changelogs]($(echo $(telegraph_post) | tr -d '\\'))
-	*▪️ VANILLA:* \`${post[1]}\`
-	*▪️ GAPPS:* \`${post[5]}\`
-	*▪️ MD5(Vanilla):* \`${post[3]}\`
-	*▪️ MD5(Gapps):* \`${post[7]}\`
+	*▪️ Changelogs:* [Source Changelogs]($(echo $(changelog_post) | tr -d '\\'))
+	*▪️ ROM Info:* [MD5 Checksum]($(echo $(zip_details) | tr -d '\\'))
+	*▪️ Support:* [Device](https://t.me/${GRP_LIN})
 
 	*Notes:*
 	• ${ANDROID_VERSION} ${RELEASE_TYPE} Release.
@@ -307,8 +319,6 @@ lazy_build_post() {
 	• *✅ Build finished after $(($BDIFF / 3600)) hrs : $(($BDIFF % 3600 / 60)) mins : $(($BDIFF % 60)) secs*
 	• *Commit SHA:* \`$(commit_sha)\`
 
-	*Follow* ${GRP_LIN}
-	*Join* ${GRP_LIN}
 	*Date:*  \`$(date +"%d-%m-%Y %T")\`" &> /dev/null
 }
 
