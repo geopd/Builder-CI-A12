@@ -47,7 +47,7 @@ rom() {
 # Build package and build type
 build_package() {
 	case "${NAME}" in
-		"AOSPA-12") PACKAGE=otapackage BUILD_TYPE=user
+		"AOSPA-12") PACKAGE=otapackage BUILD_TYPE=userdebug
 		;;
 		"AEX-12") PACKAGE=aex BUILD_TYPE=user
 		;;
@@ -73,8 +73,8 @@ tree_path() {
 
 # Build post-gen variables (optional)
 lazy_build_post_var() {
-	LAZY_BUILD_POST=true
-	INCLUDE_GAPPS=true
+	LAZY_BUILD_POST=false
+	INCLUDE_GAPPS=false
 	ANDROID_VERSION="Android 12L"
 	RELEASE_TYPE="Stable"
 	DEV=GeoPD
@@ -118,7 +118,10 @@ build_configuration() {
 	repo init --depth=1 --no-repo-verify -u $MANIFEST  -b $BRANCH -g default,-mips,-darwin,-notdefault
 	git clone $LOCAL_MANIFEST -b $NAME .repo/local_manifests
 	repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j13
-	source setup_script.sh
+	if [ $GIT_USER = GeoPD ]; then
+		source setup_script.sh &> /dev/null
+	fi
+
 }
 
 # Setup Gapps package on release post generation
