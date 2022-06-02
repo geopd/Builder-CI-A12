@@ -167,12 +167,14 @@ ccache_configuration() {
 	export CCACHE_DIR=/tmp/ccache
 	export CCACHE_EXEC=$(which ccache)
 	export USE_CCACHE=1
-	export CCACHE_DEPEND=true
-	export CCACHE_FILECLONE=true
-	export CCACHE_LIMIT_MULTIPLE=0.9
-	export CCACHE_MAXSIZE=10G
-	export CCACHE_NOCOMPRESS=true
-	export CCACHE_NOHASHDIR=1
+	cat > ${CCACHE_DIR}/ccache.conf <<EOF
+depend_mode = true
+file_clone = true
+limit_multiple = 0.9
+max_size = 0
+compression = false
+hash_dir = false
+EOF
 	ccache -z
 }
 
