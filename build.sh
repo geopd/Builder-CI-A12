@@ -132,8 +132,8 @@ build_gapps() {
 		build_command
 		compiled_zip
 		build_upload
+		telegram_post
 	fi
-	telegram_post
 }
 
 # Build commands for rom
@@ -215,8 +215,8 @@ telegram_post_build() {
 
 	*ROM:* \`${post[1]}\`
 	*MD5 Checksum:* \`${post[3]}\`
-	*Download Link:* [Tdrive](${DWD1})
-	*Size:* \`${post[2]}\`
+	*Download Link:* [Vanilla](${DWD1}) | [Gapps](${DWD2})
+	*Size:* \`${post[2]}\` | \`${post[6]}\`
 
 	*Commit SHA:* \`$(commit_sha)\`
 
@@ -376,7 +376,7 @@ compile_moments() {
 	time_diff BDIFF BUILD_START BUILD_END
 	compiled_zip
 	build_upload
-	if [ ! $LAZY_BUILD_POST = true ]; then
+	if [ ! $INCLUDE_GAPPS = true ]; then
 		telegram_post
 	fi
 	build_gapps
