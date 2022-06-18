@@ -73,7 +73,7 @@ tree_path() {
 
 # Build post-gen variables (optional)
 lazy_build_post_var() {
-	LAZY_BUILD_POST=false
+	LAZY_BUILD_POST=true
 	INCLUDE_GAPPS=false
 	ANDROID_VERSION="Android 12L"
 	RELEASE_TYPE="Stable"
@@ -215,8 +215,7 @@ telegram_post_build() {
 
 	*ROM:* \`${post[1]}\`
 	*MD5 Checksum:* \`${post[3]}\`
-	*Download Link:* [Vanilla](${DWD1}) | [Gapps](${DWD2})
-	*Size:* \`${post[2]}\` | \`${post[6]}\`
+	*Downloads:* ${ZIPS}
 
 	*Commit SHA:* \`$(commit_sha)\`
 
@@ -312,7 +311,7 @@ lazy_build_post() {
 	Updated:* \`$(date +"%d-%B-%Y")\`
 	*By:* [${DEV}](${TG_LINK})
 
-	*▪️ Downloads:* [Vanilla](${DWD1}) *(${post[2]})* | [Gapps](${DWD2}) *(${post[6]})*
+	*▪️ Downloads:* ${ZIPS}
 	*▪️ Changelogs:* [Source Changelogs]($(echo $(changelog_post) | tr -d '\\'))
 	*▪️ ROM Info:* [MD5 Checksum]($(echo $(zip_details) | tr -d '\\'))
 	*▪️ Support:* [Device](https://t.me/${GRP_LIN})
@@ -332,9 +331,11 @@ build_upload() {
 	if [ -f ${OUT}/${post[1]} ]; then
 		rclone copy ${post[0]} brrbrr:rom -P
 		DWD1=${TDRIVE}${post[1]}
+		ZIPS="[Vanilla](${DWD1}) (${post[2]})"
 	elif [ -f ${OUT}/${post[5]} ]; then
 		rclone copy ${post[4]} brrbrr:rom -P
 		DWD2=${TDRIVE}${post[5]}
+		ZIPS="[Vanilla](${DWD1}) (${post[2]}) | [Gapps](${DWD2}) (${post[6]})"
 	fi
 }
 
