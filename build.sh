@@ -75,6 +75,8 @@ tree_path() {
 lazy_build_post_var() {
 	LAZY_BUILD_POST=true
 	INCLUDE_GAPPS=false
+	ROM_VERSION="8.5"
+	ROM_TYPE="Unofficial"
 	ANDROID_VERSION="Android 12L"
 	RELEASE_TYPE="Stable"
 	DEV=GeoPD
@@ -307,9 +309,8 @@ lazy_build_post() {
 
 	telegram_build_post ${POST_IMAGE} "
 	*#${T_NAME} #ROM #$(echo ${ANDROID_VERSION,,} | tr -d ' ') #${T_DEVICE,,} #${DEVICE2,,}
-	$(echo ${post[1]^^}| cut -d'-' -f1) | ${ANDROID_VERSION^}
-	Updated:* \`$(date +"%d-%B-%Y")\`
-	*By:* [${DEV}](${TG_LINK})
+	$(echo ${post[1]^^}| cut -d'-' -f1) v${ROM_VERSION} - ${ROM_TYPE} | ${ANDROID_VERSION^}
+	Updated:* $(date +"%d-%B-%Y")
 
 	*▪️ Downloads:* ${ZIPS}
 	*▪️ Changelogs:* [Source Changelogs]($(echo $(changelog_post) | tr -d '\\'))
@@ -318,11 +319,21 @@ lazy_build_post() {
 
 	*Notes:*
 	• ${ANDROID_VERSION} ${RELEASE_TYPE} Release.
+	• Daisy Support is added. Zip is flashable in daisy
+	  For installation steps- check here: https://t.me/daisa/24
 
-	*Build Info:*
-	• *✅ Build finished after $(($BDIFF / 3600)) hrs : $(($BDIFF % 3600 / 60)) mins : $(($BDIFF % 60)) secs*
-	• *Commit SHA:* \`$(commit_sha)\`
+	*Credits:*
+	• Thanks to testers in sakura and daisy.
 
+	*By:* [${DEV}](${TG_LINK})
+	*Join* @${GRP_LIN}" &> /dev/null
+	lazy_build_post_info
+}
+
+lazy_build_post_info() {
+	telegram_message "
+	*✅ Build finished after $(($BDIFF / 3600)) hrs : $(($BDIFF % 3600 / 60)) mins : $(($BDIFF % 60)) secs*
+	*Commit SHA:* \`$(commit_sha)\`
 	*Date:*  \`$(date +"%d-%m-%Y %T")\`" &> /dev/null
 }
 
