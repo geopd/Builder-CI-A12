@@ -47,7 +47,7 @@ rom() {
 # Build package and build type
 build_package() {
 	case "${NAME}" in
-		"AOSPA-12") PACKAGE=otapackage BUILD_TYPE=userdebug
+		"AOSPA-12") PACKAGE=otapackage BUILD_TYPE=user
 		;;
 		"AEX-12") PACKAGE=aex BUILD_TYPE=user
 		;;
@@ -73,9 +73,9 @@ tree_path() {
 
 # Build post-gen variables (optional)
 lazy_build_post_var() {
-	LAZY_BUILD_POST=true
+	LAZY_BUILD_POST=false
 	INCLUDE_GAPPS=false
-	ROM_VERSION="8.5"
+	ROM_VERSION=""
 	ROM_TYPE="Unofficial"
 	ANDROID_VERSION="Android 12L"
 	RELEASE_TYPE="Stable"
