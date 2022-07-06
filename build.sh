@@ -73,9 +73,9 @@ tree_path() {
 
 # Build post-gen variables (optional)
 lazy_build_post_var() {
-	LAZY_BUILD_POST=false
+	LAZY_BUILD_POST=true
 	INCLUDE_GAPPS=false
-	ROM_VERSION=""
+	ROM_VERSION="Sapphire"
 	ROM_TYPE="Unofficial"
 	ANDROID_VERSION="Android 12L"
 	RELEASE_TYPE="Stable"
